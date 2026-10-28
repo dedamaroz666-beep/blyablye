@@ -1,0 +1,2379 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="sand">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHEPUH • Correlation & Stock Analytics Platform</title>
+    <link rel="icon" type="image/jpeg" href="/static/logo.jpg">
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- TradingView Lightweight Charts v4.2.0 CDN -->
+    <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+    <link rel="stylesheet" href="/static/style.css?v=34.0">
+    <style>
+        /* Dedicated platform styles for DataLens action buttons */
+        .datalens-btn-bulk-add {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 5px !important;
+            background: var(--bg-card, #13151c) !important;
+            border: 1px dashed var(--border-color, #1e222d) !important;
+            border-radius: 4px !important;
+            padding: 0 10px !important;
+            height: 26px !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            font-family: var(--font-mono, monospace) !important;
+            color: var(--text-muted, #8e95a5) !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease !important;
+            white-space: nowrap !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.3px !important;
+            outline: none !important;
+            box-sizing: border-box !important;
+            vertical-align: middle !important;
+        }
+        .datalens-btn-bulk-add:hover {
+            border-color: var(--accent-green, #22c55e) !important;
+            border-style: solid !important;
+            color: var(--accent-green, #22c55e) !important;
+            background: var(--accent-green-subtle, rgba(34, 197, 94, 0.15)) !important;
+        }
+        .datalens-btn-bulk-add .btn-icon {
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            color: var(--accent-green, #22c55e) !important;
+            line-height: 1 !important;
+        }
+        .datalens-btn-clear-all {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 4px !important;
+            background: var(--bg-card, #13151c) !important;
+            border: 1px solid var(--border-color, #1e222d) !important;
+            border-radius: 4px !important;
+            padding: 0 10px !important;
+            height: 26px !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            font-family: var(--font-mono, monospace) !important;
+            color: var(--text-muted, #8e95a5) !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease !important;
+            white-space: nowrap !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.3px !important;
+            outline: none !important;
+            box-sizing: border-box !important;
+            vertical-align: middle !important;
+        }
+        .datalens-btn-clear-all:hover {
+            background: var(--accent-red-badge, rgba(239, 68, 68, 0.18)) !important;
+            border-color: var(--accent-red, #ef4444) !important;
+            color: var(--accent-red, #ef4444) !important;
+        }
+        .datalens-empty-bulk-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            background: var(--bg-card, #13151c) !important;
+            border: 1px dashed var(--accent-green, #22c55e) !important;
+            border-radius: 6px !important;
+            padding: 9px 20px !important;
+            font-size: 12.5px !important;
+            font-weight: 600 !important;
+            font-family: var(--font-sans, sans-serif) !important;
+            color: var(--accent-green, #22c55e) !important;
+            cursor: pointer !important;
+            transition: all 0.18s ease !important;
+            margin-top: 16px !important;
+            outline: none !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+        .datalens-empty-bulk-btn:hover {
+            background: var(--accent-green, #22c55e) !important;
+            color: #ffffff !important;
+            border-style: solid !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25) !important;
+        }
+        .datalens-empty-bulk-btn .btn-icon {
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            line-height: 1 !important;
+        }
+
+        /* Dedicated Platform Styles for Tier View */
+        .tier-wrapper {
+            max-width: 1680px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 14px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-sizing: border-box;
+        }
+        .tier-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0 12px 0;
+            border-bottom: 1px solid var(--border-subtle, #161820);
+            gap: 12px;
+        }
+        .tier-header-brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .tier-brand-tag {
+            font-family: var(--font-mono, monospace);
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--accent-green, #22c55e);
+            letter-spacing: 0.5px;
+            background: var(--accent-green-subtle, rgba(34, 197, 94, 0.12));
+            border: 1px solid var(--accent-green, #22c55e);
+            padding: 3px 8px;
+            border-radius: 4px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+        }
+        .percent-input {
+            display: flex;
+            align-items: center;
+            position: relative;
+            width: 100%;
+        }
+        .percent-input input {
+            width: 100%;
+            padding-right: 50px !important;
+            -moz-appearance: textfield;
+        }
+        .percent-input input::-webkit-outer-spin-button,
+        .percent-input input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .percent-input .percent-unit {
+            position: absolute;
+            right: 28px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 12px;
+            color: var(--text-muted);
+            pointer-events: none;
+            user-select: none;
+        }
+        .percent-input .num-stepper-box {
+            position: absolute;
+            right: 4px;
+            top: 4px;
+            bottom: 4px;
+            width: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1px;
+        }
+        .percent-input .num-stepper-btn {
+            flex: 1;
+            background: var(--bg-surface, #0e1017);
+            border: 1px solid var(--border-color, #1e222d);
+            color: var(--text-secondary, #94a3b8);
+            font-size: 7.5px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 2px;
+            padding: 0;
+            transition: all 0.12s ease;
+            user-select: none;
+        }
+        .percent-input .num-stepper-btn:hover {
+            background: var(--bg-card-hover, rgba(255, 255, 255, 0.08));
+            border-color: var(--accent-blue, #60a5fa);
+            color: var(--accent-blue, #60a5fa);
+        }
+        .percent-input .num-stepper-btn:active {
+            background: var(--accent-blue-subtle, rgba(96, 165, 250, 0.2));
+        }
+            flex-direction: column;
+            gap: 2px;
+        }
+        .tier-main-heading {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.2;
+            letter-spacing: -0.2px;
+        }
+        .tier-sub-heading {
+            font-size: 11.5px;
+            color: var(--text-muted);
+        }
+        .tier-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tier-action-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            background: var(--bg-card, #13151c) !important;
+            border: 1px solid var(--border-color, #1e222d) !important;
+            border-radius: 4px !important;
+            padding: 0 12px !important;
+            height: 28px !important;
+            font-size: 11.5px !important;
+            font-weight: 700 !important;
+            font-family: var(--font-mono, monospace) !important;
+            color: var(--text-secondary, #e2e8f0) !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease !important;
+            outline: none !important;
+            white-space: nowrap !important;
+        }
+        .tier-action-btn:hover {
+            border-color: var(--accent-green, #22c55e) !important;
+            color: var(--accent-green, #22c55e) !important;
+            background: var(--accent-green-subtle, rgba(34, 197, 94, 0.12)) !important;
+        }
+        .tier-action-btn .btn-icon {
+            font-size: 13px !important;
+        }
+        .tier-action-btn-green {
+            background: var(--accent-green-subtle, rgba(34, 197, 94, 0.15)) !important;
+            border-color: var(--accent-green, #22c55e) !important;
+            color: var(--accent-green, #22c55e) !important;
+        }
+        .tier-action-btn-green:hover {
+            background: var(--accent-green, #22c55e) !important;
+            color: #ffffff !important;
+        }
+
+        .tier-dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.25fr 1fr 1.15fr;
+            gap: 12px;
+            width: 100%;
+        }
+        @media (max-width: 1100px) {
+            .tier-dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .tier-card {
+            background: var(--bg-card, #13151c);
+            border: 1px solid var(--border-color, #1e222d);
+            border-radius: 6px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+        .tier-card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-subtle, #161820);
+        }
+        .tier-card-title-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .tier-card-step {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--bg-surface, #0e1017);
+            border: 1px solid var(--border-color, #1e222d);
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-muted);
+            font-family: var(--font-mono, monospace);
+        }
+        .tier-card-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        .tier-status-pill {
+            font-size: 10px;
+            font-weight: 800;
+            font-family: var(--font-mono, monospace);
+            letter-spacing: 0.4px;
+            padding: 2px 7px;
+            border-radius: 3px;
+            background: var(--bg-surface, #0e1017);
+            border: 1px solid var(--border-color, #1e222d);
+            color: var(--text-muted);
+        }
+        .tier-status-pill.active {
+            background: var(--accent-green-subtle, rgba(34, 197, 94, 0.15));
+            border-color: var(--accent-green, #22c55e);
+            color: var(--accent-green, #22c55e);
+        }
+        .tier-status-pill.tier-pill-dim {
+            color: var(--text-dim);
+        }
+        .tier-card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .tier-form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .tier-field-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .tier-input-chips-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .tier-control-input {
+            background: var(--bg-input, #08090d) !important;
+            border: 1px solid var(--border-color, #1e222d) !important;
+            border-radius: 4px !important;
+            padding: 5px 10px !important;
+            font-size: 12.5px !important;
+            font-weight: 700 !important;
+            font-family: var(--font-mono, monospace) !important;
+            color: var(--text-primary) !important;
+            outline: none !important;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+        }
+        .tier-control-input:focus {
+            border-color: var(--accent-green, #22c55e) !important;
+            box-shadow: 0 0 0 1px var(--accent-green-subtle, rgba(34, 197, 94, 0.2)) !important;
+        }
+        .tier-bench-input {
+            width: 170px !important;
+            text-transform: uppercase !important;
+        }
+        .tier-mini-chips-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .tier-mini-chip {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: var(--bg-surface, #0e1017) !important;
+            border: 1px solid var(--border-color, #1e222d) !important;
+            border-radius: 3px !important;
+            padding: 0 7px !important;
+            height: 24px !important;
+            font-size: 10.5px !important;
+            font-weight: 700 !important;
+            font-family: var(--font-mono, monospace) !important;
+            color: var(--text-muted) !important;
+            cursor: pointer !important;
+            transition: all 0.12s ease !important;
+            outline: none !important;
+        }
+        .tier-mini-chip:hover {
+            color: var(--accent-green, #22c55e) !important;
+            border-color: var(--accent-green, #22c55e) !important;
+            background: var(--accent-green-subtle, rgba(34, 197, 94, 0.12)) !important;
+        }
+        .tier-mini-chip.active {
+            background: var(--accent-green-subtle, rgba(34, 197, 94, 0.18)) !important;
+            border-color: var(--accent-green, #22c55e) !important;
+            color: var(--accent-green, #22c55e) !important;
+        }
+        .tier-shares-input-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .tier-num-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tier-shares-num-input {
+            width: 70px !important;
+            text-align: center !important;
+        }
+        .tier-input-unit {
+            font-size: 11px;
+            color: var(--text-dim);
+            font-family: var(--font-mono, monospace);
+        }
+        .tier-bench-stats-strip {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            gap: 6px;
+            background: var(--bg-surface, #0e1017);
+            border: 1px solid var(--border-subtle, #161820);
+            border-radius: 4px;
+            padding: 6px 10px;
+            margin-top: 2px;
+        }
+        .tier-stat-box {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .tier-stat-box .stat-lbl {
+            font-size: 9.5px;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .tier-stat-box .stat-val {
+            font-size: 12px;
+            font-weight: 700;
+            font-family: var(--font-mono, monospace);
+            color: var(--text-primary);
+        }
+        .tier-stat-box .stat-val-green {
+            color: var(--accent-green, #22c55e);
+        }
+
+        .tier-risk-hud-block {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            padding: 2px 0;
+        }
+        .tier-risk-main-val {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+        .tier-risk-main-val .currency-sym {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-muted);
+            font-family: var(--font-mono, monospace);
+        }
+        .tier-risk-main-val .risk-amount {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--accent-green, #22c55e);
+            font-family: var(--font-mono, monospace);
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+        .tier-risk-main-val .risk-tier-tag {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-muted);
+            font-family: var(--font-mono, monospace);
+            letter-spacing: 0.5px;
+        }
+        .tier-risk-sub-info {
+            font-size: 11.5px;
+            color: var(--text-muted);
+        }
+        .tier-formula-card {
+            background: var(--bg-surface, #0e1017);
+            border-left: 2px solid var(--accent-green, #22c55e);
+            border-radius: 3px;
+            padding: 7px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 2px;
+        }
+        .tier-formula-card .formula-line code {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent-green, #22c55e);
+            font-family: var(--font-mono, monospace);
+        }
+        .tier-formula-card .formula-note {
+            font-size: 10px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .tier-segmented-pills {
+            display: inline-flex;
+            background: var(--bg-surface, #0e1017);
+            border: 1px solid var(--border-color, #1e222d);
+            border-radius: 4px;
+            padding: 2px;
+            gap: 2px;
+            width: fit-content;
+        }
+        .tier-seg-btn {
+            background: transparent !important;
+            border: none !important;
+            padding: 3px 8px !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            font-family: var(--font-mono, monospace) !important;
+            color: var(--text-muted) !important;
+            cursor: pointer !important;
+            border-radius: 3px !important;
+            transition: all 0.12s ease !important;
+            outline: none !important;
+        }
+        .tier-seg-btn:hover {
+            color: var(--text-primary) !important;
+        }
+        .tier-seg-btn.active {
+            background: var(--bg-card, #13151c) !important;
+            color: var(--accent-green, #22c55e) !important;
+            font-weight: 800 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+        }
+        .tier-select-control {
+            cursor: pointer;
+            font-size: 12px !important;
+        }
+        .tier-gk-note {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        .tier-toolbar-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0 4px;
+            border-bottom: 1px solid var(--border-subtle, #161820);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .tier-toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .tier-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tier-table-search-input {
+            background: var(--bg-input, #08090d) !important;
+            border: 1px solid var(--border-color, #1e222d) !important;
+            border-radius: 4px !important;
+            padding: 4px 10px !important;
+            font-size: 11.5px !important;
+            font-family: var(--font-mono, monospace) !important;
+            color: var(--text-primary) !important;
+            width: 170px !important;
+            height: 26px !important;
+            outline: none !important;
+            transition: width 0.2s ease, border-color 0.15s ease !important;
+            box-sizing: border-box !important;
+        }
+        .tier-table-search-input:focus {
+            width: 220px !important;
+            border-color: var(--accent-green, #22c55e) !important;
+        }
+        .tier-total-counter {
+            display: inline-flex;
+            align-items: center;
+            background: var(--bg-surface, #0e1017);
+            border: 1px solid var(--border-color, #1e222d);
+            border-radius: 4px;
+            padding: 0 8px;
+            height: 26px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: var(--font-mono, monospace);
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .tier-table-wrapper-card {
+            background: var(--bg-card, #13151c);
+            border: 1px solid var(--border-color, #1e222d);
+            border-radius: 6px;
+            padding: 0;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .tier-table-scroll-container {
+            overflow-x: auto;
+            width: 100%;
+        }
+        .tier-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .tier-table th {
+            white-space: nowrap;
+            text-align: right;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 8px 12px;
+            background: var(--bg-surface, #0e1017);
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color, #1e222d);
+        }
+        .tier-table th:first-child, .tier-table th:nth-child(2) {
+            text-align: center;
+        }
+        .tier-table th:last-child {
+            text-align: center;
+        }
+        .tier-table th.th-tier1-highlight {
+            background: var(--accent-green-badge, rgba(34, 197, 94, 0.22)) !important;
+            color: var(--accent-green, #22c55e) !important;
+            font-weight: 800 !important;
+            text-align: center;
+        }
+        .tier-table td {
+            padding: 7px 12px;
+            font-size: 12px;
+            font-family: var(--font-mono, monospace);
+            border-bottom: 1px solid var(--border-subtle, #161820);
+            text-align: right;
+            color: var(--text-primary);
+        }
+        .tier-table td.cell-center {
+            text-align: center;
+        }
+        .tier-table tr:hover td {
+            background: var(--bg-card-hover, rgba(255, 255, 255, 0.02));
+        }
+        .tier-symbol-btn {
+            background: var(--bg-surface, #0e1017) !important;
+            border: 1px solid var(--border-color, #1e222d) !important;
+            border-radius: 4px !important;
+            padding: 2px 7px !important;
+            font-family: var(--font-mono, monospace) !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            color: var(--text-primary) !important;
+            cursor: pointer !important;
+            transition: all 0.12s ease !important;
+            outline: none !important;
+        }
+        .tier-symbol-btn:hover {
+            border-color: var(--accent-green, #22c55e) !important;
+            color: var(--accent-green, #22c55e) !important;
+            background: var(--accent-green-subtle, rgba(34, 197, 94, 0.12)) !important;
+        }
+        .tier-shares-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--accent-green-badge, rgba(34, 197, 94, 0.18));
+            border: 1px solid var(--accent-green, #22c55e);
+            color: var(--accent-green, #22c55e);
+            font-family: var(--font-mono, monospace);
+            font-size: 12.5px;
+            font-weight: 800;
+        }
+        .tier-parity-badge {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 10.5px;
+            font-weight: 700;
+            font-family: var(--font-mono, monospace);
+        }
+        .tier-parity-badge.perfect {
+            color: var(--accent-green, #22c55e);
+            background: var(--accent-green-subtle, rgba(34, 197, 94, 0.15));
+        }
+        .tier-parity-badge.warning {
+            color: var(--accent-amber, #f59e0b);
+            background: var(--accent-amber-subtle, rgba(245, 158, 11, 0.15));
+        }
+        .tier-row-del-btn {
+            background: transparent !important;
+            border: none !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            color: var(--text-muted) !important;
+            cursor: pointer !important;
+            padding: 2px 5px !important;
+            transition: color 0.12s ease !important;
+            outline: none !important;
+        }
+        .tier-row-del-btn:hover {
+            color: var(--accent-red, #ef4444) !important;
+        }
+        .tier-table tfoot td {
+            background: var(--bg-surface, #0e1017);
+            font-weight: 700;
+            font-size: 11.5px;
+            border-top: 2px solid var(--border-color, #1e222d);
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Global Top Navigation Bar (Logo, Clean Zero-Emoji, Multi-Theme Switcher) -->
+    <header class="global-header">
+        <div class="brand-section">
+            <img src="/static/logo.jpg" alt="CHEPUH Logo" class="brand-logo-img">
+            <span class="brand-title">CHEPUH</span>
+        </div>
+
+        <nav class="global-nav-tabs">
+            <button class="global-tab-btn active" data-target-view="viewCalculator" type="button">
+                <span>Калькулятор Correlation & Beta</span>
+            </button>
+            <button class="global-tab-btn" data-target-view="viewStockAnalytics" type="button">
+                <span>Графики и Анализ тикера</span>
+            </button>
+            <button class="global-tab-btn" data-target-view="viewDataLens" id="globalTabDataLens" type="button">
+                <span>Data</span>
+            </button>
+            <button class="global-tab-btn" data-target-view="viewTier" id="globalTabTier" type="button">
+                <span>Tier</span>
+            </button>
+        </nav>
+
+        <div class="header-theme-selector">
+            <span class="theme-selector-label">Тема:</span>
+            <div class="theme-pills" id="themePillsContainer">
+                <button class="theme-pill active" data-theme="sand" type="button">Бежевый</button>
+                <button class="theme-pill" data-theme="blue" type="button">Синий</button>
+                <button class="theme-pill" data-theme="graphite" type="button">Графит</button>
+            </div>
+            <button type="button" id="toggleHeaderCollapseBtn" class="header-collapse-toggle-btn" title="Скрыть верхнюю панель (клавиша H)" aria-label="Скрыть меню">
+                <span class="collapse-icon">▲</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Floating Restore Header Pill (appears when header is collapsed) -->
+    <button type="button" id="restoreHeaderBtn" class="header-restore-btn" title="Показать верхнюю панель (клавиша H)" aria-label="Показать меню">
+        <span class="restore-icon">▼</span>
+        <span class="restore-text">МЕНЮ</span>
+    </button>
+
+    <!-- ============================================================
+         VIEW 1: CORRELATION & BETA CALCULATOR
+         ============================================================ -->
+    <main class="tab-view-container active" id="viewCalculator">
+        <div class="main-container">
+
+            <!-- Universe & Asset Setup -->
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="eyebrow-section">PORTFOLIO UNIVERSE SETUP</div>
+                        <h2>Universe & Asset Setup</h2>
+                        <p>Настройка групп активов, индивидуальных Custom Move и базовых бенчмарков рынка</p>
+                    </div>
+
+                    <div class="panel-header-actions">
+                        <button id="bulkTickersButton" class="primary-small-button" type="button">
+                            Bulk Import
+                        </button>
+                        <button id="addGroupButton" class="secondary-button" type="button">
+                            + Добавить группу
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Groups Container (Empty by default) -->
+                <div id="groups" class="groups-container"></div>
+
+                <!-- Global Controls Grid -->
+                <div class="controls-grid">
+                    <div class="field">
+                        <label for="benchmark">
+                            Market Asset
+                            <span class="field-required">*</span>
+                        </label>
+                        <input
+                            id="benchmark"
+                            placeholder="Например: SPY, QQQ, BTC..."
+                            value="SPY"
+                            autocomplete="off"
+                            autocapitalize="characters"
+                            spellcheck="false"
+                        >
+                        <span class="field-hint">Базовый актив или несколько через запятую: SPY, QQQ, SOXX</span>
+                    </div>
+
+                    <div class="field">
+                        <label for="benchmarkMove">
+                            Expected Market Move %
+                            <span class="field-required">*</span>
+                        </label>
+                        <div class="percent-input">
+                            <input
+                                id="benchmarkMove"
+                                type="number"
+                                step="0.1"
+                                value="1.0"
+                                placeholder="1.0"
+                            >
+                            <span class="percent-unit">%</span>
+                            <div class="num-stepper-box">
+                                <button type="button" class="num-stepper-btn" id="benchmarkMoveUp" title="Увеличить на 0.1" tabindex="-1">▲</button>
+                                <button type="button" class="num-stepper-btn" id="benchmarkMoveDown" title="Уменьшить на 0.1" tabindex="-1">▼</button>
+                            </div>
+                        </div>
+                        <span class="field-hint">Ожидаемое изменение базового актива</span>
+                    </div>
+
+                    <div class="field">
+                        <label for="period">Analysis Period</label>
+                        <select id="period">
+                            <optgroup label="Календарный период">
+                                <option value="2w">2 недели</option>
+                                <option value="1m">1 месяц</option>
+                                <option value="3m">3 месяца</option>
+                                <option value="6m">6 месяцев</option>
+                                <option value="ytd">С начала года</option>
+                                <option value="1y" selected>1 год</option>
+                                <option value="2y">2 года</option>
+                                <option value="5y">5 лет</option>
+                                <option value="custom">Свой период</option>
+                            </optgroup>
+                            <optgroup label="Отчеты">
+                                <option value="earnings_4q">4 отчета</option>
+                                <option value="earnings_8q">8 отчетов</option>
+                                <option value="earnings_12q">12 отчетов</option>
+                                <option value="earnings_16q">16 отчетов</option>
+                                <option value="earnings_20q">20 отчетов</option>
+                                <option value="earnings_all">Все отчеты</option>
+                            </optgroup>
+                        </select>
+                        <span class="field-hint">Исторический период для выборки доходностей</span>
+                    </div>
+
+                    <div class="field">
+                        <label for="calcMetric">Calculation Metric</label>
+                        <select id="calcMetric">
+                            <option value="ctc" selected>Close-to-Close</option>
+                            <option value="gap">Gap %</option>
+                            <option value="intra">Intraday %</option>
+                            <option value="session">Session %</option>
+                        </select>
+                        <span class="field-hint">База для расчета корреляции, беты и волатильности</span>
+                    </div>
+
+                    <div class="field" id="calcSessionField" style="display: none;">
+                        <label for="calcSessionMode">Торговая сессия</label>
+                        <select id="calcSessionMode">
+                            <option value="premarket" selected>Премаркет</option>
+                            <option value="intraday">Интрадей</option>
+                            <option value="postmarket">Постмаркет</option>
+                        </select>
+                        <span class="field-hint">Временной интервал внутри дня</span>
+                    </div>
+
+                    <div class="field">
+                        <label for="calcAnomalyMode">Фильтр аномалий</label>
+                        <select id="calcAnomalyMode">
+                            <option value="none" selected>Все данные</option>
+                            <option value="only_anomaly">Только аномалии</option>
+                            <option value="no_anomaly">Исключить аномалии</option>
+                        </select>
+                        <span class="field-hint">Расчет по аномальным дням</span>
+                    </div>
+                </div>
+
+                <!-- Custom Range Sub-Panel (shown when period === 'custom') -->
+                <div id="calcCustomRangeField" class="custom-range-card" style="display: none;">
+                    <div class="custom-range-header">
+                        <span class="custom-range-title">Настройка своего периода:</span>
+                        <span class="field-hint">Укажите количество дней или выберите точный интервал дат</span>
+                    </div>
+                    <div class="custom-range-inputs">
+                        <div class="custom-range-item">
+                            <label for="calcCustomDays">Количество дней:</label>
+                            <input type="number" id="calcCustomDays" placeholder="Напр. 14, 30, 45, 90" min="2" max="1825">
+                        </div>
+                        <div class="custom-range-sep">или</div>
+                        <div class="custom-range-item">
+                            <label for="calcCustomStart">С даты:</label>
+                            <input type="date" id="calcCustomStart">
+                        </div>
+                        <div class="custom-range-item">
+                            <label for="calcCustomEnd">По дату:</label>
+                            <input type="date" id="calcCustomEnd">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Anomaly Filter Sub-Panel (shown when calcAnomalyMode !== 'none') -->
+                <div id="calcAnomalyRangeField" class="custom-range-card" style="display: none;">
+                    <div class="custom-range-header">
+                        <span class="custom-range-title">Условие аномалий:</span>
+                        <span class="field-hint">Учитывать только дни, удовлетворяющие условию аномалии</span>
+                    </div>
+                    <div class="custom-range-inputs">
+                        <div class="custom-range-item">
+                            <label for="calcAnomalyTarget">Проверять по:</label>
+                            <select id="calcAnomalyTarget" class="anomaly-select">
+                                <option value="benchmark" selected>Базовый актив</option>
+                                <option value="asset">Каждый актив</option>
+                                <option value="either">Любой актив</option>
+                            </select>
+                        </div>
+                        <div class="custom-range-item">
+                            <label for="calcAnomalyMetric">Метрика:</label>
+                            <select id="calcAnomalyMetric" class="anomaly-select">
+                                <option value="gap" selected>Gap %</option>
+                                <option value="ctc">Close-to-Close</option>
+                                <option value="intra">Intraday %</option>
+                                <option value="session">Session %</option>
+                            </select>
+                        </div>
+                        <div class="custom-range-item">
+                            <label for="calcAnomalyOp">Условие:</label>
+                            <select id="calcAnomalyOp" class="anomaly-select">
+                                <option value="gt">&gt;</option>
+                                <option value="gte">≥</option>
+                                <option value="abs_gte" selected>|X| ≥</option>
+                                <option value="lte">≤</option>
+                                <option value="lt">&lt;</option>
+                            </select>
+                        </div>
+                        <div class="custom-range-item">
+                            <label for="calcAnomalyThreshold">Порог %:</label>
+                            <input type="number" id="calcAnomalyThreshold" value="5.0" step="0.5" placeholder="5.0" style="width: 80px;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calculate-wrapper">
+                    <button class="calculate-button" id="calculateButton" type="button">
+                        Расчёт
+                    </button>
+                </div>
+
+                <div id="error" class="alert error-alert" style="display: none;"></div>
+                <div id="warning" class="alert warning-alert" style="display: none;">
+                    <div id="warningText" class="warning-text"></div>
+                    <button id="warningRemovePartialBtn" class="btn warning-remove-btn" type="button" style="display: none;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        <span id="warningRemovePartialText">Удалить неполные тикеры</span>
+                    </button>
+                </div>
+
+                <div id="loading" class="loading-overlay" style="display: none;">
+                    <div class="spinner"></div>
+                    <div class="loading-text">
+                        <strong>Расчет матриц корреляций и коэффициентов Beta...</strong>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section (Screener + Matrices) -->
+            <section id="results" style="display: none;">
+                <!-- Primary Screener -->
+                <div class="panel" style="margin-bottom: 14px;">
+                    <div class="panel-header screener-panel-header">
+                        <div class="screener-title-block">
+                            <h2>PRIMARY SCREENER</h2>
+                        </div>
+
+                        <span id="screenerActiveModeBadge" class="screener-mode-badge" style="display: none;"></span>
+
+                        <div class="panel-header-actions">
+                            <button id="screenerRemovePartialBtn" class="action-btn" type="button" style="display: none;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                                <span>Убрать неполные (<span id="screenerPartialCount">0</span>)</span>
+                            </button>
+                            <button id="copyTickersButton" class="secondary-button" type="button">
+                                Копировать тикеры
+                            </button>
+                            <button id="exportAllButton" class="secondary-button" type="button">
+                                Скачать все (Excel)
+                            </button>
+                            <button id="exportFilteredButton" class="primary-small-button" type="button">
+                                Скачать выборку (.xlsx)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="benchmarkTabsContainer" class="benchmark-tabs-container" style="display: none; margin-bottom: 10px;">
+                        <div id="benchmarkTabs" class="pill-group"></div>
+                    </div>
+
+                    <div class="screener-controls">
+                        <div class="filter-row">
+                            <div class="filter-field">
+                                <label for="correlationOperator">Условие</label>
+                                <select id="correlationOperator">
+                                    <option value="none">Без фильтров (все активы)</option>
+                                    <option value="gte" selected>≥ (Больше или равно)</option>
+                                    <option value="lte">≤ (Меньше или равно)</option>
+                                    <option value="between">Между [Min, Max]</option>
+                                    <option value="abs_gte">|r| ≥ (По модулю)</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-field filter-number">
+                                <label for="correlationThreshold" id="thresholdMinLabel">Порог корреляции</label>
+                                <input
+                                    id="correlationThreshold"
+                                    type="number"
+                                    step="0.05"
+                                    min="-1"
+                                    max="1"
+                                    value="0.50"
+                                >
+                            </div>
+
+                            <div class="filter-field filter-number" id="thresholdMaxField" style="display: none;">
+                                <label for="correlationThresholdMax">Макс. порог</label>
+                                <input
+                                    id="correlationThresholdMax"
+                                    type="number"
+                                    step="0.05"
+                                    min="-1"
+                                    max="1"
+                                    value="1.00"
+                                >
+                            </div>
+
+                            <div class="filter-field filter-search">
+                                <label for="screenerSearch">Поиск тикера</label>
+                                <input
+                                    id="screenerSearch"
+                                    placeholder="Поиск тикера..."
+                                    autocomplete="off"
+                                >
+                            </div>
+
+                            <div class="filter-field filter-action">
+                                <button id="applyCorrelationFilter" class="secondary-button" type="button">
+                                    Применить
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="presets-row">
+                            <span class="preset-label">Пресеты:</span>
+                            <button class="preset-pill screener-preset" data-op="gte" data-val="0.70" type="button">Высокая (≥ 0.70)</button>
+                            <button class="preset-pill screener-preset active" data-op="gte" data-val="0.50" type="button">Умеренная (≥ 0.50)</button>
+                            <button class="preset-pill screener-preset" data-op="lte" data-val="0.30" type="button">Низкая (≤ 0.30)</button>
+                            <button class="preset-pill screener-preset" data-op="lte" data-val="0.00" type="button">Обратная (≤ 0.00)</button>
+                            <button class="preset-pill screener-preset" data-op="lte" data-val="-0.50" type="button">Сильная обратная (≤ -0.50)</button>
+                            <button class="preset-pill screener-preset" data-op="all" data-val="all" type="button">Все активы</button>
+                        </div>
+
+                        <div class="screener-status-bar">
+                            <div class="match-badge">
+                                <span>Найдено: <strong id="benchmarkResultCount">0</strong> <span id="benchmarkResultTotal">/ 0</span></span>
+                                <span id="activeFilterBadge" class="filter-badge-pill">r ≥ 0.50</span>
+                            </div>
+
+                            <div class="pagination-size">
+                                <label for="pageSizeSelect">На странице:</label>
+                                <select id="pageSizeSelect">
+                                    <option value="25">25</option>
+                                    <option value="50" selected>50</option>
+                                    <option value="100">100</option>
+                                    <option value="300">300</option>
+                                    <option value="all">Все</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table" id="mainBenchmarkTable">
+                            <thead id="benchmarkTableHead">
+                                <tr>
+                                    <th data-sort="ticker" class="sortable-th tooltip-header" data-tooltip-title="Ticker" data-tooltip-text="Тикер анализируемого актива.">
+                                        Ticker <span class="sort-icon">⇅</span>
+                                    </th>
+                                    <th data-sort="correlation" class="sortable-th tooltip-header" data-tooltip-title="Correlation" data-tooltip-text="Коэффициент корреляции Пирсона между активом и Market Asset за выбранный период (от -1.0 до +1.0).">
+                                        Correlation <span class="sort-icon">▼</span>
+                                    </th>
+                                    <th data-sort="beta" class="sortable-th tooltip-header" data-tooltip-title="Beta" data-tooltip-text="Насколько сильно актив исторически двигался относительно Market Asset. Рассчитывается как Covariance(Asset, Market) ÷ Variance(Market).">
+                                        Beta <span class="sort-icon">⇅</span>
+                                    </th>
+                                    <th data-sort="expected_move" class="sortable-th tooltip-header" data-tooltip-title="Expected Move" data-tooltip-text="Расчётное движение акции по формуле: Market Move × Beta. Например: SPY +0.8% × Beta 2.25 = ожидаемое движение +1.8%.">
+                                        Expected Move <span class="sort-icon">⇅</span>
+                                    </th>
+                                    <th data-sort="actual_move" class="sortable-th tooltip-header" data-tooltip-title="Actual Move" data-tooltip-text="Фактическое движение актива, введённое пользователем индивидуально для этого тикера.">
+                                        Actual Move <span class="sort-icon">⇅</span>
+                                    </th>
+                                    <th data-sort="difference" class="sortable-th tooltip-header" data-tooltip-title="Difference" data-tooltip-text="Разница между фактическим и ожидаемым движением: Actual Move − Expected Move. Положительное = сильнее ожидания, отрицательное = слабее.">
+                                        Difference <span class="sort-icon">⇅</span>
+                                    </th>
+                                    <th data-sort="normalized" class="sortable-th tooltip-header" data-tooltip-title="Normalized Difference" data-tooltip-text="Показывает, насколько Difference велик относительно обычной дневной волатильности акции. Формула: Difference ÷ Volatility. Например -0.20 означает, что отклонение составляет -0.2σ.">
+                                        Normalized <span class="sort-icon">⇅</span>
+                                    </th>
+                                    <th data-sort="volatility" class="sortable-th tooltip-header" data-tooltip-title="Daily Volatility" data-tooltip-text="Историческая close-to-close дневная волатильность актива. Рассчитывается как стандартное отклонение дневных доходностей.">
+                                        Daily Vol <span class="sort-icon">⇅</span>
+                                    </th>
+                                    <th data-sort="residual_volatility" class="sortable-th tooltip-header" data-tooltip-title="Residual Volatility" data-tooltip-text="Волатильность той части движения акции, которую Beta + движение benchmark не объясняют (отклонение от beta-модели).">
+                                        Residual Vol <span class="sort-icon">⇅</span>
+                                    </th>
+                                    <th data-sort="observations" class="sortable-th tooltip-header" data-tooltip-title="Observations" data-tooltip-text="Количество совместных торговых наблюдений (дней), использованных для расчёта.">
+                                        Obs <span class="sort-icon">⇅</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="benchmarkResultsTable">
+                                <tr>
+                                    <td colspan="10" class="loading-cell">Нет данных. Выполните расчет моделей выше.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="screenerPagination" class="table-pagination">
+                        <div class="pagination-info" id="screenerPaginationInfo">Показано 0-0 из 0</div>
+                        <div class="pagination-controls">
+                            <button id="screenerPrevBtn" class="page-btn" type="button" disabled>&lt; Назад</button>
+                            <span id="screenerPageNumbers" class="page-numbers">Стр. 1 из 1</span>
+                            <button id="screenerNextBtn" class="page-btn" type="button" disabled>Вперед &gt;</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Matrix 1: Correlation Matrix (Pearson) -->
+                <div class="panel" style="margin-bottom: 14px;">
+                    <div class="panel-header">
+                        <div>
+                            <h2>Matrix Correlation Pearson</h2>
+                        </div>
+                        <div class="panel-header-actions">
+                            <button class="corr-action-btn corr-export-btn" id="exportMatrixCorrExcelBtn" type="button" title="Экспорт матрицы корреляций Пирсона в Excel (.xlsx)">
+                                Экспорт
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="matrix-controls">
+                        <div class="filter-row">
+                            <div class="filter-field">
+                                <label for="matrixOperator">Условие подсветки</label>
+                                <select id="matrixOperator">
+                                    <option value="none" selected>Без фильтров (все активы)</option>
+                                    <option value="gte">≥ (Больше или равно)</option>
+                                    <option value="lte">≤ (Меньше или равно)</option>
+                                    <option value="abs_gte">|r| ≥ (По модулю)</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-field filter-number">
+                                <label for="matrixThreshold">Порог r</label>
+                                <input
+                                    id="matrixThreshold"
+                                    type="number"
+                                    step="0.05"
+                                    min="-1"
+                                    max="1"
+                                    value="0.50"
+                                >
+                            </div>
+
+                            <div class="filter-field filter-search">
+                                <label for="matrixSearch">Поиск тикера</label>
+                                <input
+                                    id="matrixSearch"
+                                    placeholder="Поиск в матрице..."
+                                    autocomplete="off"
+                                >
+                            </div>
+
+                            <div class="filter-field filter-action">
+                                <button id="applyMatrixFilterBtn" class="secondary-button" type="button">
+                                    Применить
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="presets-row">
+                            <span class="preset-label">Пресеты:</span>
+                            <button class="preset-pill matrix-preset" data-op="gte" data-val="0.70" type="button">Высокая (≥ 0.70)</button>
+                            <button class="preset-pill matrix-preset active" data-op="gte" data-val="0.50" type="button">Умеренная (≥ 0.50)</button>
+                            <button class="preset-pill matrix-preset" data-op="lte" data-val="0.30" type="button">Низкая (≤ 0.30)</button>
+                            <button class="preset-pill matrix-preset" data-op="lte" data-val="0.00" type="button">Обратная (≤ 0.00)</button>
+                            <button class="preset-pill matrix-preset" data-op="all" data-val="all" type="button">Все ячейки</button>
+                        </div>
+
+                        <div class="screener-status-bar">
+                            <div class="match-badge">
+                                <span>Отображается: <strong id="matrixMatchCount">0</strong> <span id="matrixMatchTotal">/ 0 активов</span></span>
+                                <span id="matrixActiveFilterBadge" class="filter-badge-pill">r ≥ 0.50</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="matrix-wrapper">
+                        <table id="correlationMatrix" class="matrix"></table>
+                    </div>
+                </div>
+
+                <!-- Matrix 2: Beta Coefficients Matrix -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h2>Matrix Beta (formul Slope)</h2>
+                        </div>
+                        <div class="panel-header-actions">
+                            <button class="corr-action-btn corr-export-btn" id="exportMatrixBetaExcelBtn" type="button" title="Экспорт матрицы коэффициентов Beta в Excel (.xlsx)">
+                                Экспорт
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="matrix-controls">
+                        <div class="filter-row">
+                            <div class="filter-field">
+                                <label for="matrixBetaOperator">Условие подсветки</label>
+                                <select id="matrixBetaOperator">
+                                    <option value="none" selected>Без фильтров (все активы)</option>
+                                    <option value="gte">≥ (Больше или равно)</option>
+                                    <option value="lte">≤ (Меньше или равно)</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-field filter-number">
+                                <label for="matrixBetaThreshold">Порог Beta</label>
+                                <input
+                                    id="matrixBetaThreshold"
+                                    type="number"
+                                    step="0.1"
+                                    min="-20"
+                                    max="50"
+                                    value="1.0"
+                                >
+                            </div>
+
+                            <div class="filter-field filter-search">
+                                <label for="matrixBetaSearch">Поиск тикера</label>
+                                <input
+                                    id="matrixBetaSearch"
+                                    placeholder="Поиск в матрице Beta..."
+                                    autocomplete="off"
+                                >
+                            </div>
+
+                            <div class="filter-field filter-action">
+                                <button id="applyMatrixBetaFilterBtn" class="secondary-button" type="button">
+                                    Применить
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="presets-row">
+                            <span class="preset-label">Пресеты:</span>
+                            <button class="preset-pill matrix-beta-preset" data-op="gte" data-val="1.5" type="button">High Beta (≥ 1.5)</button>
+                            <button class="preset-pill matrix-beta-preset active" data-op="gte" data-val="1.0" type="button">Moderate (≥ 1.0)</button>
+                            <button class="preset-pill matrix-beta-preset" data-op="lte" data-val="0.8" type="button">Low Beta (≤ 0.8)</button>
+                            <button class="preset-pill matrix-beta-preset" data-op="lte" data-val="0.0" type="button">Inverse (≤ 0.0)</button>
+                            <button class="preset-pill matrix-beta-preset" data-op="all" data-val="all" type="button">Все активы</button>
+                        </div>
+
+                        <div class="screener-status-bar">
+                            <div class="match-badge">
+                                <span>Отображается: <strong id="matrixBetaMatchCount">0</strong> <span id="matrixBetaMatchTotal">/ 0 активов</span></span>
+                                <span id="matrixBetaActiveFilterBadge" class="filter-badge-pill">β ≥ 1.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="matrix-wrapper">
+                        <table id="betaMatrix" class="matrix"></table>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ============================================================
+         VIEW 2: STOCK & EARNINGS CHART ANALYTICS (FINWHALE)
+         ============================================================ -->
+    <main class="tab-view-container" id="viewStockAnalytics">
+        <div class="main-container">
+
+            <!-- FinWhale Stock Top Bar -->
+            <div class="stock-top-bar">
+                <div class="stock-search-group">
+                    <span class="active-symbol-badge" id="stockViewSymbolBadge">AAPL</span>
+
+                    <div class="search-input-box">
+                        <input type="text" id="tickerInput" placeholder="Поиск тикера (AAPL, NVDA...)" autocomplete="off" value="AAPL" autocapitalize="characters" spellcheck="false">
+                        <div id="tickerDropdown" class="ticker-dropdown hidden"></div>
+                    </div>
+
+                    <button id="searchBtn" class="btn btn-primary" type="button">Анализ</button>
+                </div>
+
+                <div class="stock-controls-group">
+                    <div class="date-indicator-pill" id="stockDateIndicator">
+                        <span id="currentDateText">2026-09-02</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Company Profile Card -->
+            <section class="company-card card" id="companyCard">
+                <div class="company-header-row">
+                    <div class="company-title-block">
+                        <div class="company-meta">
+                            <div class="ticker-symbol-row">
+                                <h1 class="ticker-symbol" id="profileSymbol">AAPL</h1>
+                                <span class="ticker-exchange" id="profileExchange">NASDAQ</span>
+                                <span class="ticker-price" id="profilePrice">$325.13</span>
+                            </div>
+                            <div class="company-name" id="profileName">Apple Inc.</div>
+                        </div>
+                    </div>
+
+                    <div class="company-stats-grid">
+                        <div class="stat-pill">
+                            <span class="stat-lbl">СЕКТОР</span>
+                            <span class="stat-val" id="profileSector">Technology</span>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="stat-lbl">ИНДУСТРИЯ</span>
+                            <span class="stat-val" id="profileIndustry">Consumer Electronics</span>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="stat-lbl">КАПИТАЛИЗАЦИЯ</span>
+                            <span class="stat-val" id="profileMktCap">$4.78T</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="company-description-box">
+                    <div class="desc-header">
+                        <span class="desc-title">ОПИСАНИЕ ДЕЯТЕЛЬНОСТИ КОМПАНИИ</span>
+                    </div>
+                    <p class="desc-text" id="profileDescRu">
+                        Загрузка описания компании...
+                    </p>
+                </div>
+
+                <div class="peers-categorized-grid">
+                    <div class="peers-group">
+                        <div class="peers-group-header">
+                            <div class="peers-header-title-block">
+                                <span class="peers-group-title">Коррелируют из их индустрии (r ≥ 0.60)</span>
+                                <span class="peers-hint-sub">Связанные активы сектора</span>
+                            </div>
+                            <span class="peers-group-sub" id="industryCorrCount">Высокая связность</span>
+                        </div>
+                        <div class="peers-chips-row" id="industryCorrList">
+                            <span class="peers-placeholder">Расчет корреляций...</span>
+                        </div>
+                    </div>
+
+                    <div class="peers-group">
+                        <div class="peers-group-header">
+                            <div class="peers-header-title-block">
+                                <span class="peers-group-title">Максимально похожий бизнес</span>
+                                <span class="peers-hint-sub">Прямые конкуренты (Direct Peers)</span>
+                            </div>
+                            <span class="peers-group-sub">Конкуренты</span>
+                        </div>
+                        <div class="peers-chips-row" id="businessPeersList">
+                            <span class="peers-placeholder">Загрузка конкурентов...</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dual Chart Workspace (FinWhale Dual TradingView Charts) -->
+            <section class="charts-section">
+                <!-- Chart 1: Daily Chart -->
+                <div class="chart-card card" id="dailyChartCard">
+                    <div class="chart-wrapper" id="dailyChartWrapper">
+                        <!-- Floating Controls Toolbar -->
+                        <div class="chart-floating-toolbar">
+                            <button id="toggleDailyVolBtn" class="chart-tool-btn chart-float-btn active" type="button" title="Вкл/выкл индикатор объема (VOL)">VOL</button>
+                        </div>
+
+                        <!-- Floating Daily HUD Card -->
+                        <div id="dailyHudCard" class="chart-hud-card">
+                            <div class="hud-header" id="hudHeaderTitle"><span id="hudTicker">AAPL</span> - <span id="hudDate">MAR 4, 2025</span></div>
+                            <div class="hud-ohlc-grid">
+                                <div class="hud-cell"><span class="hud-lbl">O</span> <span class="hud-val" id="hudOpen">--</span></div>
+                                <div class="hud-cell"><span class="hud-lbl">H</span> <span class="hud-val" id="hudHigh">--</span></div>
+                                <div class="hud-cell"><span class="hud-lbl">L</span> <span class="hud-val" id="hudLow">--</span></div>
+                                <div class="hud-cell"><span class="hud-lbl">C</span> <span class="hud-val" id="hudClose">--</span></div>
+                            </div>
+                            <div class="hud-metrics-list">
+                                <div class="hud-metric-row"><span class="hud-lbl">VOL</span> <span class="hud-val" id="hudVol">--</span></div>
+                            </div>
+                        </div>
+
+                        <!-- FinWhale Delicate Green Laser Selection Line -->
+                        <div id="dailySelectionLine" class="daily-selection-line"></div>
+
+                        <!-- TradingView Measure Tool (Date & Price Range Ruler) -->
+                        <svg id="dailyRulerSvg" class="chart-ruler-svg hidden" style="display: none;">
+                            <rect class="chart-ruler-rect" />
+                            <line class="chart-ruler-line" />
+                            <circle class="chart-ruler-dot" r="3.5" />
+                            <circle class="chart-ruler-dot" r="3.5" />
+                        </svg>
+                        <div id="dailyRulerBadge" class="chart-ruler-badge hidden" style="display: none;">
+                            <div class="ruler-badge-main">
+                                <span class="ruler-pct positive">0.00%</span>
+                                <span class="ruler-diff positive">(+0.00)</span>
+                                <button class="ruler-close-btn" type="button" title="Убрать линейку (Esc / клик)" aria-label="Закрыть">×</button>
+                            </div>
+                            <div class="ruler-badge-sub">
+                                <span class="ruler-sub-item ruler-stat">0 баров, 0д</span>
+                                <span class="ruler-sub-item ruler-prices">0.00 → 0.00</span>
+                            </div>
+                        </div>
+
+                        <div id="dailyChartContainer" class="chart-container"></div>
+                        <div id="eventTooltip" class="event-tooltip hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Interactive Chart Vertical Resizer Splitter -->
+                <div class="chart-resizer" id="chartResizer" title="Потяните вверх или вниз для изменения высоты графиков (Двойной клик — сброс 50/50)">
+                    <div class="chart-resizer-line"></div>
+                    <div class="chart-resizer-handle">
+                        <span class="chart-resizer-grip"></span>
+                    </div>
+                    <div class="chart-resizer-line"></div>
+                </div>
+
+                <!-- Chart 2: Intraday Chart -->
+                <div class="chart-card card" id="intradayChartCard">
+                    <div class="chart-wrapper" id="intradayChartWrapper">
+                        <!-- Hidden keeper for active intraday date to preserve JS compatibility -->
+                        <span id="activeIntradayDate" style="display: none;">--</span>
+
+                        <!-- Floating Controls Toolbar -->
+                        <div class="chart-floating-toolbar">
+                            <button id="toggleIntradayVolBtn" class="chart-tool-btn chart-float-btn active" type="button" title="Вкл/выкл индикатор объема (VOL)">VOL</button>
+                        </div>
+
+                        <!-- TradingView Measure Tool (Date & Price Range Ruler) -->
+                        <svg id="intradayRulerSvg" class="chart-ruler-svg hidden" style="display: none;">
+                            <rect class="chart-ruler-rect" />
+                            <line class="chart-ruler-line" />
+                            <circle class="chart-ruler-dot" r="3.5" />
+                            <circle class="chart-ruler-dot" r="3.5" />
+                        </svg>
+                        <div id="intradayRulerBadge" class="chart-ruler-badge hidden" style="display: none;">
+                            <div class="ruler-badge-main">
+                                <span class="ruler-pct positive">0.00%</span>
+                                <span class="ruler-diff positive">(+0.00)</span>
+                                <button class="ruler-close-btn" type="button" title="Убрать линейку (Esc / клик)" aria-label="Закрыть">×</button>
+                            </div>
+                            <div class="ruler-badge-sub">
+                                <span class="ruler-sub-item ruler-stat">0 баров, 0мин</span>
+                                <span class="ruler-sub-item ruler-prices">0.00 → 0.00</span>
+                            </div>
+                        </div>
+
+                        <div id="intradayChartContainer" class="chart-container"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bottom Analytics Workspace -->
+            <section class="analytics-workspace card">
+                <div class="tab-nav">
+                    <button class="tab-btn active" data-tab="earningsTab" type="button">Реакция на отчеты (Earnings Moves)</button>
+                    <button class="tab-btn" data-tab="dividendsTab" type="button">История дивидендов</button>
+                </div>
+
+                <!-- Tab 1: Earnings Reaction Matrix -->
+                <div class="tab-content active" id="earningsTab">
+                    <div class="tab-controls-row">
+                        <div class="tab-title-text">
+                            <h3>Матрица движений на отчетности (Последние 8 кварталов)</h3>
+                        </div>
+                        <div class="earnings-actions-row">
+                            <div class="interval-filters">
+                                <span class="filter-lbl">Метрика по умолчанию:</span>
+                                <div class="pill-group" id="earningsGlobalMetricPills">
+                                    <button class="pill-btn active" data-metric="close_to_close" type="button">Весь день (Close-to-Close)</button>
+                                    <button class="pill-btn" data-metric="premarket" type="button">Премаркет</button>
+                                    <button class="pill-btn" data-metric="intraday" type="button">Интрадей</button>
+                                    <button class="pill-btn" data-metric="postmarket" type="button">Постмаркет</button>
+                                </div>
+                            </div>
+                            <button id="exportEarningsExcelBtn" class="btn secondary-button export-btn" type="button" title="Экспорт матрицы в Excel (.xlsx)">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                <span>Экспорт</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table" id="earningsTable">
+                            <thead>
+                                <tr>
+                                    <th>Квартал</th>
+                                    <th>Дата отчета</th>
+                                    <th>Сессия</th>
+                                    <th>EPS Факт / Ожид.</th>
+                                    <th>Сюрприз EPS</th>
+                                    <th>Выручка Факт / Ожид.</th>
+                                    <th class="metric-th-col">
+                                        <div class="th-metric-box">
+                                            <span class="th-day-lbl">R-1</span>
+                                            <select class="th-metric-select" id="metricSel_RMinus1" title="Метрика для R-1">
+                                                <option value="close_to_close">Весь день</option>
+                                                <option value="premarket">Премаркет</option>
+                                                <option value="intraday">Интрадей</option>
+                                                <option value="postmarket" selected>Постмаркет</option>
+                                            </select>
+                                        </div>
+                                    </th>
+                                    <th class="metric-th-col">
+                                        <div class="th-metric-box">
+                                            <span class="th-day-lbl">R</span>
+                                            <select class="th-metric-select" id="metricSel_R0" title="Метрика для R">
+                                                <option value="close_to_close" selected>Весь день</option>
+                                                <option value="premarket">Премаркет</option>
+                                                <option value="intraday">Интрадей</option>
+                                                <option value="postmarket">Постмаркет</option>
+                                            </select>
+                                        </div>
+                                    </th>
+                                    <th class="metric-th-col">
+                                        <div class="th-metric-box">
+                                            <span class="th-day-lbl">R+1</span>
+                                            <select class="th-metric-select" id="metricSel_RPlus1" title="Метрика для R+1">
+                                                <option value="close_to_close" selected>Весь день</option>
+                                                <option value="premarket">Премаркет</option>
+                                                <option value="intraday">Интрадей</option>
+                                                <option value="postmarket">Постмаркет</option>
+                                            </select>
+                                        </div>
+                                    </th>
+                                    <th class="metric-th-col">
+                                        <div class="th-metric-box">
+                                            <span class="th-day-lbl">R+2</span>
+                                            <select class="th-metric-select" id="metricSel_RPlus2" title="Метрика для R+2">
+                                                <option value="close_to_close" selected>Весь день</option>
+                                                <option value="premarket">Премаркет</option>
+                                                <option value="intraday">Интрадей</option>
+                                                <option value="postmarket">Постмаркет</option>
+                                            </select>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="earningsTableBody">
+                                <tr><td colspan="10" class="loading-cell">Загрузка данных по отчетам...</td></tr>
+                            </tbody>
+                            <tfoot id="earningsTableFoot"></tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Dividends -->
+                <div class="tab-content" id="dividendsTab">
+                    <div class="tab-controls-row">
+                        <div class="tab-title-text">
+                            <h3>История дивидендных выплат</h3>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table" id="dividendsTable">
+                            <thead>
+                                <tr>
+                                    <th>Дата отсечки (Ex-Date)</th>
+                                    <th>Размер дивиденда ($)</th>
+                                    <th>Дата выплаты (Pay Date)</th>
+                                    <th>Дата фиксации (Record Date)</th>
+                                    <th>Дивидендная доходность (%)</th>
+                                    <th>Периодичность</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dividendsTableBody">
+                                <tr><td colspan="6" class="loading-cell">Загрузка дивидендов...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ============================================================
+         VIEW 3: DATALENS (Comparative Stock Return Matrix & Heatmap)
+         ============================================================ -->
+    <main class="tab-view-container" id="viewDataLens">
+        <div class="datalens-wrapper">
+            <!-- Data Top Session Header -->
+            <div class="datalens-header-bar">
+                <div class="datalens-brand-box">
+                    <span class="datalens-icon-bracket">[~]</span>
+                    <span class="datalens-brand-name">[ DATA ]</span>
+                </div>
+
+                <div class="datalens-top-actions">
+                    <div class="datalens-dropdown-wrap">
+                        <button class="datalens-btn-ghost" id="datalensExportToggleBtn" type="button">
+                            Export ▾
+                        </button>
+                        <div class="datalens-dropdown-menu" id="datalensExportMenu" style="display: none;">
+                            <button type="button" id="datalensExportCsvBtn">Export as CSV</button>
+                            <button type="button" id="datalensExportExcelBtn">Export as Excel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ticker Chips & Timeframe Controls Bar -->
+            <div class="datalens-controls-bar">
+                <div class="datalens-tickers-strip">
+                    <div class="datalens-chips-list" id="datalensChipsList">
+                        <!-- Populated dynamically -->
+                    </div>
+
+                    <div class="datalens-add-ticker-wrap">
+                        <input
+                            type="text"
+                            id="datalensTickerInput"
+                            class="datalens-ticker-input"
+                            placeholder="+ Add ticker"
+                            title="Введите один или несколько тикеров (через запятую или пробел)"
+                            autocomplete="off"
+                            spellcheck="false"
+                        >
+                        <button type="button" id="datalensAddTickerBtn" class="datalens-ticker-add-btn" title="Добавить">+</button>
+                    </div>
+
+                    <button type="button" id="datalensBulkAddBtn" class="datalens-btn-bulk-add" title="Добавить несколько тикеров списком">
+                        <span class="btn-icon">+</span>
+                        <span>Несколько</span>
+                    </button>
+
+                    <button type="button" id="datalensClearAllBtn" class="datalens-btn-clear-all" title="Убрать все тикеры" style="display: none;">
+                        <span>✕</span>
+                        <span>Очистить все</span>
+                    </button>
+
+                    <span class="datalens-ticker-counter" id="datalensTickerCounter">0/100</span>
+                </div>
+
+                <div class="datalens-tf-metric-strip">
+                    <div class="datalens-tf-pills" id="datalensTfPills">
+                        <button class="datalens-tf-btn" data-period="1w" type="button">1W</button>
+                        <button class="datalens-tf-btn" data-period="1m" type="button">1M</button>
+                        <button class="datalens-tf-btn" data-period="3m" type="button">3M</button>
+                        <button class="datalens-tf-btn" data-period="6m" type="button">6M</button>
+                        <button class="datalens-tf-btn" data-period="ytd" type="button">YTD</button>
+                        <button class="datalens-tf-btn active" data-period="1y" type="button">1Y</button>
+                        <button class="datalens-tf-btn" data-period="2y" type="button">2Y</button>
+                        <button class="datalens-tf-btn" data-period="5y" type="button">5Y</button>
+                        <button class="datalens-tf-btn" data-period="max" type="button">MAX</button>
+                        <button class="datalens-tf-btn" data-period="custom" type="button" id="datalensCustomTfBtn">Custom</button>
+                    </div>
+
+                    <div class="datalens-metric-wrapper">
+                        <div class="datalens-custom-select" id="datalensCustomSelect">
+                            <button type="button" class="datalens-custom-select-trigger" id="datalensCustomSelectTrigger" aria-label="Выбор метрики" title="Наведите для просмотра расчета метрики">
+                                <span class="datalens-custom-select-label" id="datalensCustomSelectLabel">Close to Close %</span>
+                                <svg class="datalens-select-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none">
+                                    <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div class="datalens-custom-select-menu" id="datalensCustomSelectMenu" style="display: none;">
+                                <div class="datalens-custom-select-option active" data-value="cls2cls" data-metric="cls2cls">
+                                    <span class="option-name">Close to Close %</span>
+                                    <span class="option-tag">24ч</span>
+                                </div>
+                                <div class="datalens-custom-select-option" data-value="intra" data-metric="intra">
+                                    <span class="option-name">Intra %</span>
+                                    <span class="option-tag">Сессия</span>
+                                </div>
+                                <div class="datalens-custom-select-option" data-value="gap" data-metric="gap">
+                                    <span class="option-name">Gap %</span>
+                                    <span class="option-tag">Гэп</span>
+                                </div>
+                                <div class="datalens-custom-select-option" data-value="opg" data-metric="opg">
+                                    <span class="option-name">OPG %</span>
+                                    <span class="option-tag">09:30-09:35</span>
+                                </div>
+                                <div class="datalens-custom-select-option" data-value="auction" data-metric="auction">
+                                    <span class="option-name">Auction %</span>
+                                    <span class="option-tag">NSDQ/NYSE</span>
+                                </div>
+                                <div class="datalens-custom-select-option" data-value="session" data-metric="session">
+                                    <span class="option-name">Session %</span>
+                                    <span class="option-tag">Сессии</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Keep native select in DOM for complete fallback/compatibility -->
+                        <select id="datalensMetricSelect" class="datalens-metric-select-native" style="display: none;">
+                            <option value="cls2cls" selected title="Close-to-close: считается от закрытия рынка (16.30 по США) до следующего закрытия 16.30">Close to Close %</option>
+                            <option value="intra" title="Intra: считается от открытия рынка (09.30 по США) до закрытия (16.30 по США)">Intra %</option>
+                            <option value="gap" title="Gap: считается от закрытия рынка (16.30 по США) предыдущего дня до открытия рынка (09.30 по США) текущего дня">Gap %</option>
+                            <option value="opg" title="OPG: считается от цены открытия (09.30 по США) до цены в 09.35 по США">OPG %</option>
+                            <option value="auction" title="Auction: для биржи NSDQ с 09:25 до 09:30, для биржи NYSE с 08:00 до 09:30">Auction %</option>
+                            <option value="session" title="Session: расчет доходности по сессиям (Интрадей 09:30-16:00, Премаркет 04:00-09:30, Постмаркет 16:00-20:00)">Session %</option>
+                        </select>
+                    </div>
+
+                    <!-- Exchange Switcher for Auction % (appears when Auction % is selected) -->
+                    <div class="datalens-auction-subbar" id="datalensAuctionSubbar" style="display: none;">
+                        <span class="auction-subbar-label">AUCTION БИРЖА:</span>
+                        <div class="auction-subbar-pills">
+                            <button type="button" class="auction-pill-btn active" data-mode="auto" title="Автовыбор по бирже каждого тикера (NSDQ: 09:25-09:30, NYSE: 08:00-09:30)">AUTO</button>
+                            <button type="button" class="auction-pill-btn" data-mode="nsdq" title="Принудительно расчет с 09:25 до 09:30 для всех активов">NSDQ (09:25-09:30)</button>
+                            <button type="button" class="auction-pill-btn" data-mode="nyse" title="Принудительно расчет с 08:00 до 09:30 для всех активов">NYSE (08:00-09:30)</button>
+                        </div>
+                    </div>
+
+                    <!-- Session Switcher for Session % (appears when Session % is selected) -->
+                    <div class="datalens-session-subbar" id="datalensSessionSubbar" style="display: none;">
+                        <span class="session-subbar-label">СЕССИЯ:</span>
+                        <div class="session-subbar-pills">
+                            <button type="button" class="session-pill-btn active" data-mode="intra" title="Интрадей сессия: с открытия (09:30) до закрытия (16:00)">ИНТРАДЕЙ (09:30-16:00)</button>
+                            <button type="button" class="session-pill-btn" data-mode="pre" title="Премаркет сессия: с первой сделки (04:00) до открытия рынка (09:30)">ПРЕМАРКЕТ (04:00-09:30)</button>
+                            <button type="button" class="session-pill-btn" data-mode="post" title="Постмаркет сессия: с закрытия рынка (16:00) до вечернего закрытия (20:00)">ПОСТМАРКЕТ (16:00-20:00)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters Bar -->
+            <div class="datalens-filters-bar">
+                <div class="datalens-filters-left">
+                    <span class="datalens-filter-count-badge" id="datalensFilterCountBadge">FILTERS (1)</span>
+                    <div class="datalens-filter-chips" id="datalensFilterChips">
+                        <!-- Populated dynamically: e.g. MU Close% |x| >= 2 x -->
+                    </div>
+                    <button class="datalens-add-filter-chip-btn" id="datalensAddFilterBtn" type="button">+ Add Filter</button>
+                </div>
+
+                <div class="datalens-filters-hint">
+                    CLICK CHIP TO EDIT • FUNNEL IN COLUMN TO ADD
+                </div>
+            </div>
+
+            <!-- Custom Date Range Picker Strip (Hidden by default) -->
+            <div class="datalens-custom-range-bar" id="datalensCustomRangeBar" style="display: none;">
+                <span class="custom-range-label">Диапазон дат:</span>
+                <label>От <input type="date" id="datalensCustomStart" class="datalens-date-input"></label>
+                <label>До <input type="date" id="datalensCustomEnd" class="datalens-date-input"></label>
+                <button type="button" id="datalensApplyCustomRange" class="primary-small-button">Применить</button>
+                <button type="button" id="datalensCancelCustomRange" class="secondary-button">Отмена</button>
+            </div>
+
+            <!-- Main Data Table Container -->
+            <div class="datalens-table-card">
+                <div class="datalens-loading-overlay" id="datalensLoadingOverlay" style="display: none;">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Загрузка данных Data...</div>
+                </div>
+
+                <div class="datalens-table-scroll-wrap">
+                    <table class="datalens-table" id="datalensTable">
+                        <thead id="datalensThead">
+                            <!-- Populated dynamically: DATE, SPY ▽, QQQ ▽, MU ▽ -->
+                        </thead>
+                        <tbody id="datalensTbody">
+                            <!-- Populated dynamically with % change rows & heatmap -->
+                        </tbody>
+                        <tfoot id="datalensTfoot">
+                            <!-- Populated dynamically: COUNT, MEAN, MEDIAN, STD DEV, MIN, MAX -->
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div id="datalensEmptyState" class="datalens-empty-state">
+                    <p id="datalensEmptyStateText">Добавьте тикеры через «+ Add ticker» или кнопку «+ Несколько», чтобы отобразить таблицу данных.</p>
+                    <button type="button" id="datalensEmptyStateBulkBtn" class="datalens-empty-bulk-btn" title="Добавить список тикеров">
+                        <span class="btn-icon">+</span>
+                        <span>Добавить список тикеров</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ============================================================
+         VIEW 4: TIER POSITION SIZING & RISK PARITY
+         ============================================================ -->
+    <main class="tab-view-container" id="viewTier">
+        <div class="tier-wrapper">
+            <!-- Header Bar -->
+            <div class="tier-header-bar">
+                <div class="tier-header-brand-wrap">
+                    <span class="tier-brand-tag">[ TIER ]</span>
+                </div>
+                <div class="tier-header-actions">
+                    <button type="button" class="tier-action-btn" id="tierRecalcBtn" title="Пересчитать риск-паритет">
+                        <span>Пересчитать</span>
+                    </button>
+                    <button type="button" class="tier-action-btn" id="tierExportCsvBtn" title="Экспорт таблицы в CSV">
+                        <span>CSV</span>
+                    </button>
+                    <button type="button" class="tier-action-btn" id="tierExportExcelBtn" title="Экспорт отчёта в Excel (.xlsx)">
+                        <span>Excel</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Top Dashboard Grid -->
+            <div class="tier-dashboard-grid">
+                <!-- Card 1: Benchmark Config -->
+                <div class="tier-card">
+                    <div class="tier-card-head">
+                        <div class="tier-card-title-row">
+                            <span class="tier-card-step">1</span>
+                            <span class="tier-card-title">БЕНЧМАРК (ЭТАЛОН РИСКА)</span>
+                        </div>
+                        <span class="tier-status-pill" id="tierBenchStatusBadge">НЕ ЗАДАН</span>
+                    </div>
+
+                    <div class="tier-card-body">
+                        <div class="tier-form-field">
+                            <label class="tier-field-label">Тикер эталона:</label>
+                            <div class="tier-input-chips-row">
+                                <input type="text" id="tierBenchTickerInput" class="tier-control-input tier-bench-input" value="" placeholder="Введите тикер (напр. MU)..." maxlength="12" autocomplete="off" spellcheck="false">
+                                <div class="tier-mini-chips-group">
+                                    <button type="button" class="tier-mini-chip" data-ticker="MU">MU</button>
+                                    <button type="button" class="tier-mini-chip" data-ticker="NVDA">NVDA</button>
+                                    <button type="button" class="tier-mini-chip" data-ticker="SPY">SPY</button>
+                                    <button type="button" class="tier-mini-chip" data-ticker="QQQ">QQQ</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tier-form-field">
+                            <div class="tier-shares-input-row">
+                                <label class="tier-field-label">Базовый объём бенчмарка в 1 Тире:</label>
+                                <div class="tier-num-input-wrap">
+                                    <input type="number" id="tierBenchSharesInput" class="tier-control-input tier-shares-num-input" value="5" min="1" max="100000" step="1">
+                                    <span class="tier-input-unit">акций</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Benchmark Metrics Strip -->
+                        <div class="tier-bench-stats-strip">
+                            <div class="tier-stat-box">
+                                <span class="stat-lbl">Цена Close</span>
+                                <span class="stat-val" id="tierBenchPriceVal">—</span>
+                            </div>
+                            <div class="tier-stat-box">
+                                <span class="stat-lbl">GK Волатильность (день)</span>
+                                <span class="stat-val stat-val-green" id="tierBenchGkDayVal">—</span>
+                            </div>
+                            <div class="tier-stat-box">
+                                <span class="stat-lbl">GK Волатильность (год)</span>
+                                <span class="stat-val" id="tierBenchGkAnnVal">—</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Risk Target Display -->
+                <div class="tier-card">
+                    <div class="tier-card-head">
+                        <div class="tier-card-title-row">
+                            <span class="tier-card-step">2</span>
+                            <span class="tier-card-title">ЦЕЛЕВОЙ РИСК НА 1 ТИР</span>
+                        </div>
+                        <span class="tier-status-pill tier-pill-dim">TARGET RISK</span>
+                    </div>
+
+                    <div class="tier-card-body">
+                        <div class="tier-risk-hud-block">
+                            <div class="tier-risk-main-val">
+                                <span class="currency-sym">$</span>
+                                <span class="risk-amount" id="tierTargetRiskNumber">0.00</span>
+                                <span class="risk-tier-tag">/ ТИР</span>
+                            </div>
+                            <div class="tier-risk-sub-info">
+                                Номинал эталона: <strong id="tierBenchNotionalVal">—</strong> (<span id="tierBenchSharesSummary">0</span> шт.)
+                            </div>
+                        </div>
+
+                        <div class="tier-formula-card">
+                            <div class="formula-line"><code>Dollar Risk = Shares × Price × σ<sub>GK</sub></code></div>
+                            <p class="formula-note">Каждый добавляемый стак автоматически нормируется так, чтобы его долларовый риск позиции строго равнялся риску эталона.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Settings & Rounding -->
+                <div class="tier-card">
+                    <div class="tier-card-head">
+                        <div class="tier-card-title-row">
+                            <span class="tier-card-step">3</span>
+                            <span class="tier-card-title">ПАРАМЕТРЫ РАСЧЕТА</span>
+                        </div>
+                        <span class="tier-status-pill tier-pill-dim">SETTINGS</span>
+                    </div>
+
+                    <div class="tier-card-body">
+                        <div class="tier-form-field">
+                            <label class="tier-field-label">Окно расчёта GK (торговых дней):</label>
+                            <div class="tier-segmented-pills" id="tierLookbackPills">
+                                <button type="button" class="tier-seg-btn" data-days="5">5D</button>
+                                <button type="button" class="tier-seg-btn" data-days="10">10D</button>
+                                <button type="button" class="tier-seg-btn active" data-days="20">20D</button>
+                                <button type="button" class="tier-seg-btn" data-days="30">30D</button>
+                                <button type="button" class="tier-seg-btn" data-days="60">60D</button>
+                                <button type="button" class="tier-seg-btn" data-days="90">90D</button>
+                                <button type="button" class="tier-seg-btn" data-days="252">1Y</button>
+                            </div>
+                        </div>
+
+                        <div class="tier-form-field">
+                            <label class="tier-field-label">Шаг округления акций:</label>
+                            <select id="tierRoundingSelect" class="tier-control-input tier-select-control">
+                                <option value="1" selected>До 1 акции (стандартное)</option>
+                                <option value="5">Кратно 5 акциям</option>
+                                <option value="10">Кратно 10 акциям (лоты)</option>
+                                <option value="floor">В меньшую сторону (floor / консервативно)</option>
+                                <option value="ceil">В большую сторону (ceil)</option>
+                                <option value="exact">Без округления (точный float)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar Controls Bar -->
+            <div class="tier-toolbar-bar">
+                <div class="tier-toolbar-left">
+                    <!-- Single ticker add -->
+                    <div class="datalens-add-ticker-wrap">
+                        <input
+                            type="text"
+                            id="tierAddSingleInput"
+                            class="datalens-ticker-input"
+                            placeholder="+ Add ticker"
+                            title="Введите тикер (через запятую или пробел)"
+                            autocomplete="off"
+                            spellcheck="false"
+                        >
+                        <button type="button" id="tierAddSingleBtn" class="datalens-ticker-add-btn" title="Добавить">+</button>
+                    </div>
+
+                    <!-- Bulk button -->
+                    <button type="button" id="tierBulkOpenBtn" class="datalens-btn-bulk-add" title="Добавить список тикеров">
+                        <span class="btn-icon">+</span>
+                        <span>Несколько</span>
+                    </button>
+
+                    <!-- Clear all button -->
+                    <button type="button" id="tierClearAllBtn" class="datalens-btn-clear-all" title="Убрать все тикеры" style="display: none;">
+                        <span>✕</span>
+                        <span>Очистить все</span>
+                    </button>
+                </div>
+
+                <div class="tier-toolbar-right">
+                    <div class="tier-filter-search-box">
+                        <input
+                            type="text"
+                            id="tierTableFilterInput"
+                            class="tier-table-search-input"
+                            placeholder="Фильтр по таблице..."
+                            autocomplete="off"
+                            spellcheck="false"
+                        >
+                    </div>
+                    <span class="tier-total-counter" id="tierTickerCounter">0 тикеров</span>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="tier-card tier-table-wrapper-card">
+                <div class="tier-table-scroll-container">
+                    <table class="tier-table" id="tierResultsTable" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th style="width: 100px;">ТИКЕР</th>
+                                <th class="th-tier1-highlight" title="Сколько акций для 1 тира относительно бенчмарка">ТИР 1 (АКЦИИ)</th>
+                                <th>КАПИТАЛ 1 ТИР</th>
+                                <th>РИСК 1 ТИР</th>
+                                <th style="text-align: center;">ПАРИТЕТ</th>
+                                <th style="width: 36px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tierTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                        <tfoot id="tierTableFoot">
+                            <tr>
+                                <td id="tierFootSummaryCount" class="cell-center">ИТОГО (0 тикеров)</td>
+                                <td id="tierFootTotalShares" class="cell-center">-</td>
+                                <td id="tierFootTotalNotional">$0.00</td>
+                                <td id="tierFootTotalRisk" style="font-weight: 700;">$0.00</td>
+                                <td class="cell-center">-</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Loading overlay -->
+                <div id="tierLoadingOverlay" class="loading-overlay" style="display: none;">
+                    <div class="spinner"></div>
+                    <span id="tierLoadingText">Расчёт Garman-Klass волатильности и позиций...</span>
+                </div>
+
+                <!-- Empty State -->
+                <div id="tierEmptyState" class="datalens-empty-state" style="display: block;">
+                    <p id="tierEmptyTitle" style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">Список тикеров пуст</p>
+                    <p id="tierEmptyDesc" style="font-size: 12px; color: var(--text-muted); max-width: 500px; margin: 0 auto 18px; line-height: 1.5;">
+                        Задайте эталонный тикер в карточке бенчмарка выше (напр. <strong>MU</strong>, <strong>NVDA</strong> или <strong>SPY</strong>) и добавьте акции для расчёта тиров через «+ Add ticker» или кнопку «+ Несколько».
+                    </p>
+                    <button type="button" id="tierEmptyBulkBtn" class="datalens-empty-bulk-btn" title="Добавить список тикеров">
+                        <span class="btn-icon">+</span>
+                        <span>Добавить список тикеров</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- DataLens Filter Popover / Modal (Exact layout as photo) -->
+    <div id="datalensFilterModalBackdrop" class="modal-backdrop" aria-hidden="true" style="display: none;">
+        <div class="datalens-filter-modal" id="datalensFilterModal">
+            <div class="datalens-modal-header">
+                <div class="modal-title-row">
+                    <span class="modal-title-label">FILTER SCOPE</span>
+                    <span class="modal-scope-chip" id="modalScopeTickerBadge">[MU]</span>
+                    <select id="modalScopeTickerSelect" class="modal-scope-select" style="display: none;"></select>
+                </div>
+                <button type="button" class="modal-close" id="closeDatalensFilterModal">✕</button>
+            </div>
+
+            <div class="datalens-modal-body">
+                <!-- Step 1: Filter Type -->
+                <div class="filter-modal-step">
+                    <div class="step-label">1. FILTER TYPE</div>
+                    <div class="step-options-row" id="filterTypeOptions">
+                        <button type="button" class="filter-pill-btn active" data-type="Earnings">Earnings</button>
+                        <button type="button" class="filter-pill-btn" data-type="Ex-Div">Ex-Div</button>
+                        <button type="button" class="filter-pill-btn" data-type="Pay Date">Pay Date</button>
+                        <button type="button" class="filter-pill-btn" data-type="Quantitative">Quantitative</button>
+                        <button type="button" class="filter-pill-btn" data-type="HoldMove">Hold Move</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Offset (For Earnings, exact as photo) -->
+                <div class="filter-modal-step" id="filterEarningsOffsetStep" style="display: block;">
+                    <div class="step-label">2. OFFSET</div>
+                    <div class="step-options-row" id="filterOffsetOptions">
+                        <button type="button" class="filter-pill-btn" data-offset="R-1">R-1</button>
+                        <button type="button" class="filter-pill-btn active" data-offset="R">R</button>
+                        <button type="button" class="filter-pill-btn" data-offset="R+1">R+1</button>
+                        <button type="button" class="filter-pill-btn" data-offset="R+2">R+2</button>
+                        <button type="button" class="filter-pill-btn" data-offset="R+W" title="Следующая календарная неделя (Пн–Пт после отчета)">R+W</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Column (For Quantitative) -->
+                <div class="filter-modal-step" id="filterColumnStep" style="display: none;">
+                    <div class="step-label">2. COLUMN</div>
+                    <div class="step-options-row" id="filterColOptions">
+                        <button type="button" class="filter-pill-btn active" data-col="cls2cls" data-metric-tooltip="cls2cls" title="Close-to-Close %">Close%</button>
+                        <button type="button" class="filter-pill-btn" data-col="intra" data-metric-tooltip="intra" title="Intra %">Intra%</button>
+                        <button type="button" class="filter-pill-btn" data-col="gap" data-metric-tooltip="gap" title="Gap %">Gap%</button>
+                        <button type="button" class="filter-pill-btn" data-col="opg" data-metric-tooltip="opg" title="OPG % (09:30 → 09:35)">OPG%</button>
+                        <button type="button" class="filter-pill-btn" data-col="auction" data-metric-tooltip="auction" title="Auction % (NSDQ 09:25→09:30 / NYSE 08:00→09:30)">Auction%</button>
+                        <button type="button" class="filter-pill-btn" data-col="session" data-metric-tooltip="session" title="Session % (Интрадей / Премаркет / Постмаркет)">Session%</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Operator (For Quantitative) -->
+                <div class="filter-modal-step" id="filterOperatorStep" style="display: none;">
+                    <div class="step-label">3. OPERATOR</div>
+                    <div class="step-options-row" id="filterOpOptions">
+                        <button type="button" class="filter-pill-btn" data-op="gte">≥</button>
+                        <button type="button" class="filter-pill-btn" data-op="lte">≤</button>
+                        <button type="button" class="filter-pill-btn active" data-op="abs_gte">|x| ≥</button>
+                        <button type="button" class="filter-pill-btn" data-op="abs_lte">|x| ≤</button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Value (For Quantitative) -->
+                <div class="filter-modal-step" id="filterValueStep" style="display: none;">
+                    <div class="step-label">4. VALUE</div>
+                    <div class="filter-number-input-wrap">
+                        <input
+                            type="number"
+                            id="filterModalValueInput"
+                            class="filter-number-input"
+                            value="2"
+                            step="0.5"
+                        >
+                    </div>
+                </div>
+
+                <!-- Steps for HoldMove Filter -->
+                <div class="filter-modal-step" id="filterHoldMoveDirectionStep" style="display: none;">
+                    <div class="step-label">2. DIRECTION</div>
+                    <div class="step-options-row" id="filterHoldDirectionOptions">
+                        <button type="button" class="filter-pill-btn active" data-dir="both">Both (±1%)</button>
+                        <button type="button" class="filter-pill-btn" data-dir="up">Long (+1%)</button>
+                        <button type="button" class="filter-pill-btn" data-dir="down">Short (-1%)</button>
+                    </div>
+                </div>
+
+                <div class="filter-modal-step" id="filterHoldMoveThresholdsStep" style="display: none;">
+                    <div class="step-label">3. THRESHOLDS (% FROM PREV. CLOSE)</div>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 130px;">
+                            <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Порог хода (≥ %):</label>
+                            <input type="number" id="filterHoldThresholdInput" class="filter-number-input" value="1.0" step="0.1" min="0.1" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1; min-width: 130px;">
+                            <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Мин. удержание (откат %):</label>
+                            <input type="number" id="filterHoldMinHoldInput" class="filter-number-input" value="0.90" step="0.05" min="0.0" style="width: 100%;">
+                        </div>
+                    </div>
+                    <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 5px; line-height: 1.3;">
+                        Допускается шум (напр. 0.98%–0.90%), но не глубже мин. удержания.
+                    </div>
+                </div>
+
+                <div class="filter-modal-step" id="filterHoldMoveWindowStep" style="display: none;">
+                    <div class="step-label">4. КОГДА ДОСТИГАЕТ (TIME WINDOW)</div>
+                    <div class="step-options-row" id="filterHoldWindowOptions">
+                        <button type="button" class="filter-pill-btn active" data-window="any">Без разницы (Any)</button>
+                        <button type="button" class="filter-pill-btn" data-window="premarket">Премаркет (04:00 - 09:30)</button>
+                        <button type="button" class="filter-pill-btn" data-window="regular">Интрадей (09:30 - 16:00)</button>
+                        <button type="button" class="filter-pill-btn" data-window="postmarket">Постмаркет (16:00 - 20:00)</button>
+                    </div>
+                </div>
+
+                <div class="filter-modal-step" id="filterHoldMoveUntilStep" style="display: none;">
+                    <div class="step-label">5. УДЕРЖИВАТЬ ДО КЛЮЧЕВОГО ТАЙМИНГА (HOLD UNTIL)</div>
+                    <div class="step-options-row" id="filterHoldUntilOptions">
+                        <button type="button" class="filter-pill-btn active" data-until="09:30">09:30</button>
+                        <button type="button" class="filter-pill-btn" data-until="16:30">16:30</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="datalens-modal-footer">
+                <button type="button" id="filterModalDeleteBtn" class="modal-delete-btn" style="display: none;">DELETE</button>
+                <div class="footer-right-actions">
+                    <button type="button" id="filterModalCancelBtn" class="modal-cancel-btn">CANCEL</button>
+                    <button type="button" id="filterModalAddBtn" class="modal-add-btn">ADD</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="bulkTickerModal" class="modal-backdrop" aria-hidden="true">
+        <div class="bulk-modal">
+            <div class="bulk-modal-header">
+                <div>
+                    <div class="eyebrow-section">BULK UNIVERSE IMPORT</div>
+                    <h2>Импорт списка тикеров</h2>
+                    <p>Вставьте список тикеров или тикеров с Custom Move %: <code>COHR 4.0</code>, <code>AAPL -0.5%</code>, <code>NVDA</code>.</p>
+                </div>
+                <button id="closeBulkModal" class="modal-close" type="button">✕</button>
+            </div>
+
+            <div class="bulk-target-row">
+                <label for="bulkTargetGroup">Целевая группа:</label>
+                <select id="bulkTargetGroup"></select>
+            </div>
+
+            <div class="bulk-modal-body" style="margin-top: 10px;">
+                <textarea
+                    id="bulkTickerText"
+                    class="bulk-textarea"
+                    style="min-height: 180px;"
+                    placeholder="msft aapl nvda tsla amzn ...&#10;или с ходом: COHR 4.0 AAPL -0.5 NVDA 2.2"
+                ></textarea>
+            </div>
+
+            <div class="bulk-modal-footer">
+                <span id="bulkTotalCount">0 тикеров</span>
+                <div class="panel-header-actions">
+                    <button id="cancelBulkModal" class="secondary-button" type="button">Отмена</button>
+                    <button id="addBulkTickers" class="primary-small-button" type="button">Добавить к группе</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Correlation Matrix Bulk Tickers -->
+    <div id="corrBulkModal" class="modal-backdrop" aria-hidden="true">
+        <div class="bulk-modal" style="max-width: 540px;">
+            <div class="bulk-modal-header">
+                <div>
+                    <div class="eyebrow-section">МАТРИЦА КОРРЕЛЯЦИЙ & BETA</div>
+                    <h2>Добавить несколько тикеров</h2>
+                    <p>Вставьте список тикеров через запятую, пробел или с новой строки (например: <code>NVDA, MSFT, AMD, QCOM, TSM</code>).</p>
+                </div>
+                <button id="closeCorrBulkModal" class="modal-close" type="button">✕</button>
+            </div>
+
+            <div class="bulk-modal-body" style="margin-top: 10px;">
+                <textarea
+                    id="corrBulkTickerText"
+                    class="bulk-textarea"
+                    style="min-height: 160px;"
+                    placeholder="NVDA, MSFT, AMD&#10;QCOM, TSM, INTC&#10;ARM, MU, AVGO"
+                ></textarea>
+            </div>
+
+            <div class="bulk-modal-footer">
+                <span id="corrBulkTotalCount" style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Распознано: 0 тикеров</span>
+                <div class="panel-header-actions">
+                    <button id="cancelCorrBulkModal" class="secondary-button" type="button">Отмена</button>
+                    <button id="submitCorrBulkTickers" class="primary-small-button" type="button">Добавить в матрицу</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for DataLens Bulk Tickers -->
+    <div id="datalensBulkModal" class="modal-backdrop" aria-hidden="true">
+        <div class="bulk-modal" style="max-width: 540px;">
+            <div class="bulk-modal-header">
+                <div>
+                    <div class="eyebrow-section">ТАБЛИЦА DATA</div>
+                    <h2>Добавить несколько тикеров</h2>
+                    <p>Вставьте список тикеров через запятую, пробел или с новой строки (например: <code>NVDA, MSFT, AMD, QCOM, TSM</code>).</p>
+                </div>
+                <button id="closeDatalensBulkModal" class="modal-close" type="button">✕</button>
+            </div>
+
+            <div class="bulk-modal-body" style="margin-top: 10px;">
+                <textarea
+                    id="datalensBulkTickerText"
+                    class="bulk-textarea"
+                    style="min-height: 160px;"
+                    placeholder="NVDA, MSFT, AMD&#10;QCOM, TSM, INTC&#10;ARM, MU, AVGO"
+                ></textarea>
+            </div>
+
+            <div class="bulk-modal-footer">
+                <span id="datalensBulkTotalCount" style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Распознано: 0 тикеров</span>
+                <div class="panel-header-actions">
+                    <button id="cancelDatalensBulkModal" class="secondary-button" type="button">Отмена</button>
+                    <button id="submitDatalensBulkTickers" class="primary-small-button" type="button">Добавить в Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tier Bulk Add Modal -->
+    <div id="tierBulkModalBackdrop" class="modal-backdrop" aria-hidden="true" style="display: none;">
+        <div class="bulk-modal" style="max-width: 580px;">
+            <div class="bulk-modal-header">
+                <div>
+                    <div class="eyebrow-section">TIER POSITION SIZING</div>
+                    <h2>Массовое добавление тикеров в Tier</h2>
+                    <p>Вставьте тикеры через пробел, запятую или с новой строки (до 500+ тикеров)</p>
+                </div>
+                <button type="button" class="modal-close" id="closeTierBulkModal">✕</button>
+            </div>
+
+            <div class="bulk-modal-body" style="padding: 16px 20px;">
+                <textarea
+                    id="tierBulkTickerText"
+                    class="bulk-textarea"
+                    style="min-height: 180px;"
+                    placeholder="NVDA, AAPL, AMD&#10;MSFT, TSLA, PLTR&#10;SOUN, AMZN, META, AVGO"
+                ></textarea>
+            </div>
+
+            <div class="bulk-modal-footer">
+                <span id="tierBulkTotalCount" style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Распознано: 0 тикеров</span>
+                <div class="panel-header-actions">
+                    <button id="cancelTierBulkModal" class="secondary-button" type="button">Отмена</button>
+                    <button id="submitTierBulkTickers" class="primary-small-button" type="button">Добавить в Tier</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <p>CHEPUH • Quantitative Asset Intelligence Platform</p>
+    </footer>
+
+    <!-- Global Floating Tooltip Element -->
+    <div id="globalTooltip" class="global-tooltip" style="display: none;">
+        <div id="tooltipTitle" class="tooltip-title"></div>
+        <div id="tooltipText" class="tooltip-text"></div>
+    </div>
+
+    <!-- Floating Metric Calculation Tooltip ("Табличка") -->
+    <div id="datalensMetricTooltip" class="datalens-metric-tooltip-card" style="display: none;">
+        <div class="metric-tt-header">
+            <div class="metric-tt-badge-row">
+                <span class="metric-tt-badge" id="metricTtBadge">Close to Close %</span>
+                <span class="metric-tt-scope" id="metricTtScope">24h • Междневное</span>
+            </div>
+            <div class="metric-tt-formula" id="metricTtFormula">
+                ((Close - Prev Close) / Prev Close) × 100%
+            </div>
+        </div>
+        <div class="metric-tt-body">
+            <p class="metric-tt-desc" id="metricTtDesc">
+                Close-to-close считается от закрытия рынка (16.30 по США) до следующего закрытия 16.30.
+            </p>
+            <div class="metric-tt-table">
+                <div class="metric-tt-row">
+                    <span class="metric-tt-cell-lbl">Точка старта:</span>
+                    <span class="metric-tt-cell-val" id="metricTtStart">Вчера, 16:30 США (Close)</span>
+                </div>
+                <div class="metric-tt-row">
+                    <span class="metric-tt-cell-lbl">Точка финиша:</span>
+                    <span class="metric-tt-cell-val" id="metricTtEnd">Сегодня, 16:30 США (Close)</span>
+                </div>
+                <div class="metric-tt-row">
+                    <span class="metric-tt-cell-lbl">Что включает:</span>
+                    <span class="metric-tt-cell-val" id="metricTtIncludes">Ночь + Премаркет + Торговая сессия</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js?v=33.0"></script>
+</body>
+</html>
